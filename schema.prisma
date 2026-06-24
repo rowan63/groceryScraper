@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id            Int            @id @default(autoincrement())
+  canonicalName String
+  category      String?
+  imageUrl      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  storeProducts StoreProduct[]
+}
+
+model StoreProduct {
+  id            Int            @id @default(autoincrement())
+  productId     Int?
+  store         Store
+  storeSku      String
+  barcode       String?
+  name          String
+  imageUrl      String?
+  category      String?
+  currentPrice  Float
+  unitPrice     Float?
+  unitLabel     String?
+  isOnSale      Boolean        @default(false)
+  salePrice     Float?
+  originalPrice Float?
+  url           String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  product       Product?       @relation(fields: [productId], references: [id])
+  priceHistory  PriceHistory[]
+
+  @@unique([store, storeSku])
+}
+
+model PriceHistory {
+  id             Int          @id @default(autoincrement())
+  storeProductId Int
+  price          Float
+  isOnSale       Boolean      @default(false)
+  salePrice      Float?
+  recordedAt     DateTime     @default(now())
+  storeProduct   StoreProduct @relation(fields: [storeProductId], references: [id])
+}
+
+enum Store {
+  WOOLWORTHS
+  COLES
+  ALDI
+}
